@@ -1,5 +1,4 @@
 import hashlib
-from ecdsa import SigningKey, VerifyingKey, SECP256k1
 from transaction_state import TransactionState
 from datetime import datetime
 # from chain import BlockChain
