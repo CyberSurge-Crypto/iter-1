@@ -35,16 +35,6 @@ def test_mine_block():
         f"Block hash {block.hash} does not meet the difficulty requirement."
     )
 
-def test_zero_transactions_validation():
-    # Test that creating a block with zero transactions raises a ValueError.
-    transactions = []  # Empty list of transactions.
-    try:
-        block = Block(index=2, transactions=transactions, timestamp=time.time(), previous_hash="0")
-        # If block creation succeeds, that is an error.
-        assert False, "Expected ValueError when creating a block with zero transactions."
-    except ValueError as e:
-        print("Caught expected ValueError:", e)
-
 def test_multiple_transactions():
     # Test a block with multiple transactions.
     transactions = [
@@ -75,10 +65,6 @@ def main():
     print("Testing mine()")
     test_mine_block()
     print("mine() test passed!\n")
-    
-    print("Testing block with zero transactions validation")
-    test_zero_transactions_validation()
-    print("Zero transactions validation test passed!\n")
     
     print("Testing block with multiple transactions")
     test_multiple_transactions()

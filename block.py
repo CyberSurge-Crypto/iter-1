@@ -3,8 +3,6 @@ import hashlib
 
 class Block:
     def __init__(self, index, transactions, timestamp, previous_hash, nonce=0):
-        if not transactions:
-            raise ValueError("A block must contain at least one transaction.")
         self.index = index
         self.transactions = transactions
         self.timestamp = timestamp
