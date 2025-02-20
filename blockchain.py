@@ -2,8 +2,10 @@
 from typing import List
 from block import Block
 from user import User
-import time
 from transaction import Transaction
+from consensus import verify_signature
+from constant import TransactionState
+import time
 
 class Blockchain:
     def __init__(self):
@@ -65,3 +67,30 @@ class Blockchain:
                     return False
 
         return True
+    
+    """
+    Below is the methods that interacts with transactions
+    """
+    def verify_transaction(self, transaction: Transaction) -> bool:
+        """ Verify that the signature is from the sender in this transaction """
+        if (transaction.signature is None or transaction.sender is None):
+            return False
+        elif (transaction.signature == verify_signature(transaction, transaction.sender)):
+            return True
+        return False
+
+    def validate_transaction(self, transaction: Transaction) -> bool:
+        """ Validate that the sender has enough balance for this transaction """
+        if (transaction.sender is None):
+            return False
+        return self.get_balance(transaction, transaction.sender) >= transaction.amount
+    
+    def prove_transaction(self, transaction: Transaction) -> None:
+        """Allow full-node users to prove the transaction (and notify the miners)"""
+        if self.verify(transaction) and self.validate(transaction):
+            transaction.state = TransactionState.SIGNED
+        else:
+            transaction.state = TransactionState.FAILED
+        return
+
+    
