@@ -3,6 +3,7 @@ from typing import List
 from block import Block
 from user import User
 import time
+from transaction import Transaction
 
 class Blockchain:
     def __init__(self):
@@ -12,7 +13,6 @@ class Blockchain:
 
     def create_genesis_block(self) -> None:
         """Create the genesis block of the blockchain"""
-        from transaction import Transaction
         genesis_transaction = Transaction("genesis", "genesis", 0)
         genesis_block = Block(0, [genesis_transaction], time.time(), "0")
         self.chain.append(genesis_block)
