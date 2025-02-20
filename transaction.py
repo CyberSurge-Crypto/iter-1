@@ -1,29 +1,30 @@
 import hashlib
-from transaction_state import TransactionState
+from constant import TransactionState
 from datetime import datetime
 # from chain import BlockChain
 # from user import User
 
+# 新区块：验证没有以前发过的交易
+# txn-ID: sender + receiver + time（交易本身产生）
+
 class Transaction:
     def __init__(self, sender: str, receiver: str, amount: int) -> None:
-        self.transaction_id = None
-        self.timestamp = datetime.now()
+        time = datetime.now()
+        self.transaction_id = sender + receiver + str(time) + amount
+        self.timestamp = time
         self.sender = sender
         self.receiver = receiver
         self.amount = amount
         self.state = TransactionState.STARTED
         self.signature = None
 
+## methods moved to the BlockChain class
+
     # let the user sign the transaction
-    async def sign(self):
-        priv_key = input("Type your private key to sign the transaction: ")
-        user = User.get_user(self.sender)
-        if user.verify_key(priv_key):
-            signature = create_signature(self, priv_key)
-            self.signature = signature
-            return True
-        else:
-            return False
+    def sign(self, priv_key: str):
+        signature = create_signature(self, priv_key)
+        self.signature = signature
+        return
 
     # verify the signature is from the sender
     def verify(self):
@@ -51,7 +52,7 @@ class Transaction:
     # called by the miner
     def first_confirm(self, txn_id):
         self.state = TransactionState.FIRST_CONFIRMED
-        self.transaction_id = txn_id
+        self.transaction_id = txn_id # delete
         return
 
     # called by the miner that mined the 6th block since the txn
@@ -66,6 +67,16 @@ class Transaction:
 
     def __str__(self):
         return str(str(self.transaction_id)) + " " + str(self.timestamp) + " " + str(self.sender) + " " + str(self.receiver) + " " + str(self.amount) + " " + str(self.state)
+    
+    def __dict__(self):
+        return {
+            "transaction_id": self.transaction_id,
+            "timestamp": self.timestamp,
+            "sender": self.sender,
+            "receiver": self.receiver,
+            "amount": self.amount,
+            "state": self.state
+        }
     
 ## from Copilot-GPT4o
 def create_signature(txn, private_key):
