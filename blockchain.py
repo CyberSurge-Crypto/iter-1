@@ -1,11 +1,13 @@
 # blockchain.py
-from typing import List
+from typing import List, Optional
 from block import Block
 from user import User
 from transaction import Transaction
-from consensus import verify_signature
 from constant import TransactionState
 import time
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization
 
 class Blockchain:
     def __init__(self):
@@ -19,20 +21,20 @@ class Blockchain:
         genesis_block = Block(0, [genesis_transaction], time.time(), "0")
         self.chain.append(genesis_block)
 
-    def register_user(self, user_id: str) -> User:
+    def register_user(self) -> User:
         """Register a new user in the blockchain"""
-        user = User(user_id)
+        user = User()
         self.users.append(user)
         return user
 
-    def get_balance(self, public_key: str) -> int:
-        """Get the balance of a user by their public key"""
+    def get_balance(self, address: str) -> int:
+        """Get the balance of a user by their address"""
         balance = 0
         for block in self.chain:
             for transaction in block.transactions:
-                if transaction.sender == public_key:
+                if transaction.sender == address:
                     balance -= transaction.amount
-                if transaction.receiver == public_key:
+                if transaction.receiver == address:
                     balance += transaction.amount
         return balance
 
@@ -72,12 +74,35 @@ class Blockchain:
     Below is the methods that interacts with transactions
     """
     def verify_transaction(self, transaction: Transaction) -> bool:
-        """ Verify that the signature is from the sender in this transaction """
-        if (transaction.signature is None or transaction.sender is None):
+        """Verify that the signature is valid for this transaction"""
+        if transaction.signature is None or transaction.sender is None:
             return False
-        elif (transaction.signature == verify_signature(transaction, transaction.sender)):
+        
+        try:
+            # Reconstruct the message that was signed
+            txn_message = f"{transaction.sender}{transaction.receiver}{transaction.amount}{transaction.timestamp}".encode()
+            
+            # Get the public key from transaction sender (you'll need to maintain a mapping of addresses to public keys)
+            # This is simplified - you'll need to implement proper key management
+            public_key_hex = self.get_public_key_for_address(transaction.sender)
+            if not public_key_hex:
+                return False
+            
+            public_key = serialization.load_pem_public_key(bytes.fromhex(public_key_hex))
+            
+            # Verify signature
+            public_key.verify(
+                bytes.fromhex(transaction.signature),
+                txn_message,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
             return True
-        return False
+        except Exception:
+            return False
 
     def validate_transaction(self, transaction: Transaction) -> bool:
         """ Validate that the sender has enough balance for this transaction """
@@ -92,5 +117,10 @@ class Blockchain:
         else:
             transaction.state = TransactionState.FAILED
         return
+
+    def get_public_key_for_address(self, address: str) -> Optional[str]:
+        """Get the public key for a given address"""
+        user = next((user for user in self.users if user.address == address), None)
+        return user.get_public_key() if user else None
 
     
