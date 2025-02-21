@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization
 from transaction import Transaction
 import hashlib
+from constant import TransactionState
 
 class User:
     _users: Dict[str, 'User'] = {}  # Class variable to store all users
@@ -22,7 +23,6 @@ class User:
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
         self.address = self._generate_address(public_key_bytes)
-        self.balance = 0
 
         # Add user to class variable
         User._users[self.address] = self
@@ -54,11 +54,9 @@ class User:
         Returns:
             Transaction object if successful, None otherwise
         """
-        if self.balance >= amount:
-            transaction = Transaction(self.address, receiver_address, amount)
-            self.sign_transaction(transaction)
-            return transaction
-        return None
+        transaction = Transaction(self.address, receiver_address, amount)
+        self.sign_transaction(transaction)
+        return transaction
 
     def sign_transaction(self, transaction: Transaction) -> None:
         """Sign a transaction with the user's private key"""
@@ -71,6 +69,7 @@ class User:
             ),
             hashes.SHA256()
         )
+        transaction.state = TransactionState.SIGNED
         transaction.signature = signature.hex()
     
     def verify_transaction(self, transaction: Transaction) -> bool:

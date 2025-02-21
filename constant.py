@@ -2,6 +2,7 @@
 from enum import Enum
 
 DIFFICULTY = 2
+SYSTEM="SYSTEM_ADDRESS"
 
 class TransactionState(Enum):
     STARTED = 'started'

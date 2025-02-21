@@ -3,7 +3,7 @@ from typing import List, Optional, Dict
 from block import Block
 from user import User
 from transaction import Transaction
-from constant import DIFFICULTY, TransactionState
+from constant import SYSTEM, DIFFICULTY, TransactionState
 import time
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -27,6 +27,7 @@ class Blockchain:
 
     def register_user(self, user: User) -> None:
         """Register a new user in the blockchain"""
+        self.pending_transactions.append(Transaction(SYSTEM, user.address, 100))
         self.user_registry[user.address] = user
 
     def get_balance(self, address: str) -> int:
@@ -74,6 +75,8 @@ class Blockchain:
             
         # Transaction validation
         for tx in block.transactions:
+            if tx.sender == SYSTEM:
+                continue
             if not self.validate_transaction(tx):
                 return False
             if tx.state != TransactionState.SIGNED:
@@ -90,7 +93,7 @@ class Blockchain:
             return False
             
         try:
-            public_key = self.user_registry[tx.sender].public_key
+            public_key = self.user_registry[tx.sender]._public_key
             message = f"{tx.sender}{tx.receiver}{tx.amount}{tx.timestamp}"
             
             public_key.verify(
@@ -111,7 +114,10 @@ class Blockchain:
         """ Validate that the sender has enough balance for this transaction """
         if (transaction.sender is None):
             return False
-
+        
+        if (transaction.sender == SYSTEM):
+            return True
+        
         if not self.verify_transaction_signature(transaction):
             return False
 
@@ -120,7 +126,7 @@ class Blockchain:
             pt.amount for pt in self.pending_transactions 
             if pt.sender == transaction.sender
         )
-
+        
         return sender_balance - pending_spent >= transaction.amount
     
     def prove_transaction(self, transaction: Transaction) -> None:
@@ -151,4 +157,3 @@ class Blockchain:
         new_block.mine(DIFFICULTY)
         self.add_block(new_block)
         self.pending_transactions = []
-    

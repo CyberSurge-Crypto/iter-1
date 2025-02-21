@@ -16,8 +16,16 @@ class TestBlockchainFramework(unittest.TestCase):
         self.blockchain.register_user(self.user2)
 
         # Give some initial balance
-        self.user1.balance = 100
-
+        new_block = Block(
+            index=len(self.blockchain.chain),
+            transactions=self.blockchain.pending_transactions,
+            timestamp=time.time(),
+            previous_hash=self.blockchain.get_last_block().hash
+        )
+        new_block.mine(difficulty=2)
+        self.blockchain.add_block(new_block)
+        self.assertEqual(len(self.blockchain.chain), 2)
+        
     def test_create_users(self):
         """Test if users are created and registered properly"""
         self.assertIn(self.user1.get_address(), self.blockchain.user_registry)
@@ -57,9 +65,8 @@ class TestBlockchainFramework(unittest.TestCase):
         new_block.mine(difficulty=2)  # Assuming difficulty is 2
         self.blockchain.add_block(new_block)
 
-        self.assertEqual(len(self.blockchain.chain), 2)
+        self.assertEqual(len(self.blockchain.chain), 3)
         self.assertEqual(new_block.previous_hash, self.blockchain.chain[-2].hash)
-        print("pass test_mining_block")
 
     def test_balance_update_after_transaction(self):
         """Test if the balance updates correctly after transactions"""
@@ -77,7 +84,7 @@ class TestBlockchainFramework(unittest.TestCase):
         self.blockchain.add_block(new_block)
         # Check balances after the transaction
         self.assertEqual(self.blockchain.get_balance(self.user1.get_address()), 60)
-        self.assertEqual(self.blockchain.get_balance(self.user2.get_address()), 40)
+        self.assertEqual(self.blockchain.get_balance(self.user2.get_address()), 140)
 
     def test_block_validation(self):
         """Test if block validation works correctly"""
