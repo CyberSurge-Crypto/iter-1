@@ -1,5 +1,4 @@
 import unittest
-from datetime import datetime
 from transaction import Transaction
 from constant import TransactionState
 

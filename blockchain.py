@@ -7,7 +7,6 @@ from constant import SYSTEM, DIFFICULTY, TransactionState
 import time
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import serialization
 
 class Blockchain:
     def __init__(self):
