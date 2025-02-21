@@ -1,10 +1,11 @@
 from constant import TransactionState
 from datetime import datetime
+import hashlib
 
 class Transaction:
     def __init__(self, sender: str, receiver: str, amount: int) -> None:
         self.timestamp = datetime.now()
-        self.transaction_id = sender + receiver + str(self.timestamp) + str(amount)
+        self.transaction_id = hashlib.sha256(f"{sender}{receiver}{amount}{self.timestamp}".encode()).hexdigest()
         self.sender = sender
         self.receiver = receiver
         self.amount = amount
