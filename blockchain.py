@@ -3,7 +3,7 @@ from typing import List, Optional, Dict
 from block import Block
 from user import User
 from transaction import Transaction
-from constant import TransactionState
+from constant import DIFFICULTY, TransactionState
 import time
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -13,7 +13,6 @@ class Blockchain:
     def __init__(self):
         self.chain: List[Block] = []
         self.user_registry: Dict[str, User] = {}
-
         # mempool of pending transactions
         self.pending_transactions: List[Transaction] = []
 
@@ -70,7 +69,7 @@ class Blockchain:
             return False
             
         # Proof-of-Work validation
-        if not block.hash.startswith('0'*self.difficulty):
+        if not block.hash.startswith('0'*DIFFICULTY):
             return False
             
         # Transaction validation
@@ -91,7 +90,7 @@ class Blockchain:
             return False
             
         try:
-            public_key = self.user_registry[tx.sender].public_key
+            public_key = self.user_registry[tx.sender].get_public_key()
             message = tx.unsigned_data().encode()
             
             public_key.verify(
@@ -149,7 +148,7 @@ class Blockchain:
             previous_hash=self.get_last_block().hash
         )
         
-        new_block.mine(self.difficulty)
+        new_block.mine(DIFFICULTY)
         self.add_block(new_block)
         self.pending_transactions = []
     

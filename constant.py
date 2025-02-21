@@ -1,6 +1,8 @@
 # create an enum for the state of a transaction
 from enum import Enum
 
+DIFFICULTY = 2
+
 class TransactionState(Enum):
     STARTED = 'started'
     SIGNED = 'signed'

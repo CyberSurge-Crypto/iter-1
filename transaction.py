@@ -15,13 +15,14 @@ class Transaction:
     def __str__(self) -> str:
         return str(str(self.transaction_id)) + " " + str(self.timestamp) + " " + str(self.sender) + " " + str(self.receiver) + " " + str(self.amount) + " " + str(self.state)
     
-    def __dict__(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             "transaction_id": self.transaction_id,
-            "timestamp": self.timestamp,
+            "timestamp": self.timestamp.isoformat(),
             "sender": self.sender,
             "receiver": self.receiver,
             "amount": self.amount,
-            "state": self.state
+            "state": self.state.value,
+            "signature": self.signature
         }
     

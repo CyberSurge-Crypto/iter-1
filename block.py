@@ -16,7 +16,7 @@ class Block:
         """
         block_string = json.dumps({
             'index': self.index,
-            'transactions': [tx.__dict__ for tx in self.transactions],
+            'transactions': [tx.to_dict() for tx in self.transactions],
             'timestamp': self.timestamp,
             'previous_hash': self.previous_hash,
             'nonce': self.nonce,
