@@ -3,6 +3,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization
 from transaction import Transaction
+from consensus import create_signature
 
 class User:
     _users: Dict[str, 'User'] = {}  # Class variable to store all users
@@ -84,3 +85,11 @@ class User:
             transaction = Transaction(self.public_key, receiver, amount)
             return transaction
         return None
+    
+    # TODO: modify the priv_key logic
+    def sign_transaction(transaction: Transaction, priv_key: str) -> None:
+        """Sign a transaction with the sender's private key"""
+        txn_message = f"{transaction.sender}{transaction.receiver}{transaction.amount}{transaction.timestamp}"
+        signature = create_signature(txn_message, priv_key)
+        transaction.signature = signature
+        return
