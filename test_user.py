@@ -5,16 +5,16 @@ from cryptography.hazmat.primitives import serialization
 
 @pytest.fixture
 def user():
-    return User("test_user")
+    return User()
 
 @pytest.fixture
 def second_user():
-    return User("test_user_2")
+    return User()
 
 class TestUser:
     def test_user_creation(self, user):
         """Test if user is created with correct initial values"""
-        assert user.user_id == "test_user"
+        assert user.address is not None
         assert user.balance == 0
         assert user.public_key is not None
         assert len(user.public_key) > 0
