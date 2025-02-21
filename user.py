@@ -31,7 +31,7 @@ class User:
         """Generate an address from public key"""
         sha256_hash = hashlib.sha256(public_key_bytes).digest()
         ripemd160_hash = hashlib.new('ripemd160', sha256_hash).digest()
-        # Return last 40 chars of hex string (similar to ETH address format)
+        # Return last 40 chars of hex string
         return '0x' + ripemd160_hash.hex()[:40]
 
     def get_address(self) -> str:
