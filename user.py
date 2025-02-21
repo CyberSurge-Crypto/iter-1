@@ -73,6 +73,24 @@ class User:
         )
         transaction.signature = signature.hex()
     
+    def verify_transaction(self, transaction: Transaction) -> bool:
+        """Verify a transaction with the user's public key"""
+        public_key = self._users[transaction.sender]._public_key
+        message = f"{transaction.sender}{transaction.receiver}{transaction.amount}{transaction.timestamp}"
+        try:
+            public_key.verify(
+                bytes.fromhex(transaction.signature),
+                message.encode(),
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            return True
+        except Exception:
+            return False
+    
     def broadcast_transaction(self, transaction: Transaction) -> None:
         """Broadcast a transaction to the network"""
         # TODO: Implement broadcasting
