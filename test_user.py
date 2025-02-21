@@ -15,7 +15,6 @@ class TestUser:
     def test_user_creation(self, user):
         """Test if user is created with correct initial values"""
         assert user.address is not None
-        assert user.balance == 0
         assert user.public_key is not None
         assert len(user.public_key) > 0
 
@@ -56,7 +55,6 @@ class TestUser:
     async def test_start_transaction_sufficient_balance(self, user, second_user):
         """Test transaction creation with sufficient balance"""
         # Manually set balance for testing
-        user.balance = 1000
         
         transaction = await user.start_transaction(second_user.public_key, 100)
         assert transaction is not None

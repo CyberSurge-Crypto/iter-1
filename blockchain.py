@@ -3,17 +3,15 @@ from typing import List, Optional, Dict
 from block import Block
 from user import User
 from transaction import Transaction
-from constant import TransactionState
+from constant import SYSTEM, DIFFICULTY, TransactionState
 import time
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import serialization
 
 class Blockchain:
     def __init__(self):
         self.chain: List[Block] = []
         self.user_registry: Dict[str, User] = {}
-
         # mempool of pending transactions
         self.pending_transactions: List[Transaction] = []
 
@@ -28,6 +26,7 @@ class Blockchain:
 
     def register_user(self, user: User) -> None:
         """Register a new user in the blockchain"""
+        self.pending_transactions.append(Transaction(SYSTEM, user.address, 100))
         self.user_registry[user.address] = user
 
     def get_balance(self, address: str) -> int:
@@ -70,11 +69,13 @@ class Blockchain:
             return False
             
         # Proof-of-Work validation
-        if not block.hash.startswith('0'*self.difficulty):
+        if not block.hash.startswith('0'*DIFFICULTY):
             return False
             
         # Transaction validation
         for tx in block.transactions:
+            if tx.sender == SYSTEM:
+                continue
             if not self.validate_transaction(tx):
                 return False
             if tx.state != TransactionState.SIGNED:
@@ -91,7 +92,7 @@ class Blockchain:
             return False
             
         try:
-            public_key = self.user_registry[tx.sender].public_key
+            public_key = self.user_registry[tx.sender]._public_key
             message = f"{tx.sender}{tx.receiver}{tx.amount}{tx.timestamp}"
             
             public_key.verify(
@@ -112,7 +113,10 @@ class Blockchain:
         """ Validate that the sender has enough balance for this transaction """
         if (transaction.sender is None):
             return False
-
+        
+        if (transaction.sender == SYSTEM):
+            return True
+        
         if not self.verify_transaction_signature(transaction):
             return False
 
@@ -121,7 +125,7 @@ class Blockchain:
             pt.amount for pt in self.pending_transactions 
             if pt.sender == transaction.sender
         )
-
+        
         return sender_balance - pending_spent >= transaction.amount
     
     def prove_transaction(self, transaction: Transaction) -> None:
@@ -149,7 +153,6 @@ class Blockchain:
             previous_hash=self.get_last_block().hash
         )
         
-        new_block.mine(self.difficulty)
+        new_block.mine(DIFFICULTY)
         self.add_block(new_block)
         self.pending_transactions = []
-    
