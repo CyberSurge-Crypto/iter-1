@@ -3,9 +3,8 @@ from datetime import datetime
 
 class Transaction:
     def __init__(self, sender: str, receiver: str, amount: int) -> None:
-        time = datetime.now()
-        self.transaction_id = sender + receiver + str(time) + amount
-        self.timestamp = time
+        self.timestamp = datetime.now()
+        self.transaction_id = sender + receiver + str(self.timestamp) + str(amount)
         self.sender = sender
         self.receiver = receiver
         self.amount = amount
