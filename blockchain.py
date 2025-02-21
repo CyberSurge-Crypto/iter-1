@@ -90,12 +90,12 @@ class Blockchain:
             return False
             
         try:
-            public_key = self.user_registry[tx.sender].get_public_key()
-            message = tx.unsigned_data().encode()
+            public_key = self.user_registry[tx.sender].public_key
+            message = f"{tx.sender}{tx.receiver}{tx.amount}{tx.timestamp}"
             
             public_key.verify(
                 bytes.fromhex(tx.signature),
-                message,
+                message.encode(),
                 padding.PSS(
                     mgf=padding.MGF1(hashes.SHA256()),
                     salt_length=padding.PSS.MAX_LENGTH
