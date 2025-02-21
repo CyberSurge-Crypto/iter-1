@@ -7,7 +7,6 @@ SYSTEM="SYSTEM_ADDRESS"
 class TransactionState(Enum):
     STARTED = 'started'
     SIGNED = 'signed'
-    PENDING = 'pending'
     FIRST_CONFIRMED = 'first_confirmed'
     FULLY_CONFIRMED = 'fully_confirmed'
     CANCELED = 'canceled'
